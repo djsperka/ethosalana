@@ -1,4 +1,4 @@
-% Concatenate all tables found in the folder below. 
+% Concatenate all tables found in the folder below. clear
 % Load mat files, assumed to be results from ethosal.
 % Add columns to each results table to denote the subject ID, input file
 % base, block number, and the date/time data was collected. 
@@ -46,13 +46,15 @@ for i=1:length(list)
 
     % make a column vector, same height as the results table we just
     % loaded, with the values we just extracted from the filename.
-    clear('DateTime', 'SubjID', 'InfileBase', 'BlockNum');
+    clear('DateTime', 'SubjID', 'InfileBase', 'BlockNum', 'tReaction');
     DateTime(1:height(results), 1) = {r{1}(1)};
     SubjID(1:height(results), 1) = repmat(r{1}(2), height(results), 1);     %{r{1}(2)};
     InfileBase(1:height(results), 1) = {r{1}(3)};
     BlockNum(1:height(results), 1) = str2num(r{1}{4});
+    tReaction(1:height(results), 1) = results.tResp - results.tBon;
+    tReaction(results.tResp<0) = NaN;
 
-    Z = addvars(results, DateTime, SubjID, InfileBase, BlockNum, 'Before','ImagePairIndex');
+    Z = addvars(results, DateTime, SubjID, InfileBase, BlockNum, tReaction, 'Before','ImagePairIndex');
     output = [output; Z];
 end
 
