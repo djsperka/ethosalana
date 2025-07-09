@@ -1,13 +1,37 @@
-% Concatenate all tables found in the folder below. clear
-% Load mat files, assumed to be results from ethosal.
+% Concatenate all tables found in the 'folder', defined below. Creates a
+% single table in the workspace named 'output'. Any existing value of
+% 'output' is overwritten.
+%
+% Load mat files from a single folder. The files are assumed to be results 
+% from ethosal, named with this scheme:
+%
+%   date_subjID_filebase_blkN
+%
+%   1 date in format YYYY-mm-dd-HHMM
+%   2 subjID is the subjectID entered at time of data collection
+%   3 filebase is the basename of the input data file (the mat file)
+%   4 N is the block number
+%
 % Add columns to each results table to denote the subject ID, input file
 % base, block number, and the date/time data was collected. 
-% As for a file to store the big table.
+% Also compute the reaction time (NaN where there was none) and add a
+% column for it.
+% Column names added (and type):
+% DateTime (str)
+% SubjID (str)
+% InfileBase (str)
+% BlockNum (numeric)
+% tReaction (numeric, NaN if no response for this trial)
 
-% Folder with all the mat files
+
+% Folder with all the mat files.
 folder='/home/dan/work/cclab/ethdata/EthologicalSalience/Ethdata/Interaction';
 
-% list all mat files in folder
+% 'list' will be a struct representing all '*.mat' files in 'folder'. Elements
+% of struct: name, folder, date, bytes, isdir, datenum. All useful, but
+% here we only use folder and name to load each file - we can use 
+% 'fullfile(list(i).folder, list(i).name)' to get us the filename for
+% loading.
 list = dir(fullfile(folder, '*.mat'));
 
 % output initially empty, vertcat onto this.
@@ -46,6 +70,8 @@ for i=1:length(list)
 
     % make a column vector, same height as the results table we just
     % loaded, with the values we just extracted from the filename.
+    % DateTime, SubjID, InfileBase, BlockNum (numeric), reaction time (NaN
+    % if no response for this trial)
     clear('DateTime', 'SubjID', 'InfileBase', 'BlockNum', 'tReaction');
     DateTime(1:height(results), 1) = {r{1}(1)};
     SubjID(1:height(results), 1) = repmat(r{1}(2), height(results), 1);     %{r{1}(2)};
@@ -58,6 +84,8 @@ for i=1:length(list)
     output = [output; Z];
 end
 
+% Now save the table in a file. When loading the file, it will contain a
+% single thing - the table called 'output'.
 [fname, loc] = uiputfile('','Save filename');
 fprintf('saving %s\n', fullfile(loc, fname));
 save(fullfile(loc, fname), "output", "-mat");

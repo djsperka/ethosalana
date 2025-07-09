@@ -38,13 +38,12 @@ classdef LEth
             subj.subjID = subjects';
         end
 
-        function ttypes = trialTypes()
+        function ttypes = sciTrialTypes()
             ttypes = {'HH', 'HL', 'LH', 'LL'};
         end
 
-        function lByTrialType = byTrialType(R)
-            t = cellfun(@(x) strcmp(R.sciTrialType, {x}), LEth.trialTypes(), 'UniformOutput', false);
-            lByTrialType = (t{:});
+        function clBySciTrialType = bySciTrialType(R)
+            clBySciTrialType = cellfun(@(x) strcmp(R.sciTrialType, {x}), LEth.sciTrialTypes(), 'UniformOutput', false);
         end
 
 
