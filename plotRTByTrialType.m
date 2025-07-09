@@ -11,16 +11,18 @@ function  plotRTByTrialType(R, options)
 
     clBySciTrialType = LEth.bySciTrialType(R);
     rxTimes = cellfun(@(x) R.tReaction(x), clBySciTrialType, UniformOutput=false);
-    rxTimesMean = cellfun(@(x) mean(x, 'omitmissing'), rxTimes);
 
+    rxTimesMean = cellfun(@(x) mean(x, 'omitmissing'), rxTimes)  
     if isa(options.axes, 'matlab.graphics.axis.Axes')
         axes(options.axes);
     end
-    bar(LEth.sciTrialTypes(), rxTimesMean);
+    bar(categorical(LEth.sciTrialTypes()), rxTimesMean);
     title(options.title);
     xlabel('Trial Type');
     ylabel('Reaction time (s)');
     ylim([0, 1]);
+    
+
 end
 
 function mustBeAxesOrZero(x)

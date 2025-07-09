@@ -43,7 +43,6 @@ for i=1:length(list)
     Y=load(fullfile(list(i).folder, list(i).name));
     results = Y.results;
 
-
     % parse filename for parts
     % regex relies on the filename format:  
     % 
