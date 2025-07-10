@@ -6,22 +6,30 @@ function  plotRTByTrialType(R, options)
         R table {mustBeEthosalResults},
         options.axes (1,1) {mustBeAxesOrZero} = 0,
         options.title {mustBeNonzeroLengthText} = 'Reaction time vs trial type',
+        options.type {mustBeNonzeroLengthText} = 'bar'
     end
 
 
     clBySciTrialType = LEth.bySciTrialType(R);
     rxTimes = cellfun(@(x) R.tReaction(x), clBySciTrialType, UniformOutput=false);
 
-    rxTimesMean = cellfun(@(x) mean(x, 'omitmissing'), rxTimes)  
     if isa(options.axes, 'matlab.graphics.axis.Axes')
         axes(options.axes);
     end
-    bar(categorical(LEth.sciTrialTypes()), rxTimesMean);
-    title(options.title);
-    xlabel('Trial Type');
-    ylabel('Reaction time (s)');
-    ylim([0, 1]);
-    
+    if strcmp(options.type, 'bar')
+        rxTimesMean = cellfun(@(x) mean(x, 'omitmissing'), rxTimes);
+        bar(categorical(LEth.sciTrialTypes()), rxTimesMean);
+        title(options.title);
+        xlabel('Trial Type');
+        ylabel('Reaction time (s)');
+        ylim([0, 2]);
+    elseif strcmp(options.type, 'boxchart')
+        boxchart(categorical(R.sciTrialType, LEth.sciTrialTypes), R.tReaction)
+        title(options.title);
+        xlabel('Trial Type');
+        ylabel('Reaction time (s)');
+        ylim([0, 2]);
+    end
 
 end
 

@@ -34,8 +34,8 @@ classdef LEth
         function subj = bySubject(R)
             subjects = unique(R.SubjID);
             z=cellfun(@(x) strcmp(R.SubjID, {x}), subjects', 'UniformOutput', false);
-            subj.lSubject = (z{:});
-            subj.subjID = subjects';
+            subj.lSubject = horzcat(z{:});
+            subj.SubjID = subjects';
         end
 
         function ttypes = sciTrialTypes()
