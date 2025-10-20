@@ -49,13 +49,87 @@ classdef LEth
         end
 
         function ttypes = sciTrialTypes()
+        % bySciTrialType(R) Returns the sci trial types.
             ttypes = {'HH', 'HL', 'LH', 'LL'};
         end
 
-        function clBySciTrialType = bySciTrialType(R)
-            clBySciTrialType = cellfun(@(x) strcmp(R.sciTrialType, {x}), LEth.sciTrialTypes(), 'UniformOutput', false);
+        function lBySciTrialType = bySciTrialType(R,varargin)
+        % bySciTrialType(R) Returns logical array(s) corresponding to sci
+        % trial types.
+        %  If a results table alone is passed, then a cell array is
+        %  returned. Each element of the array is itself a logical array
+        %  corresponding to the sciTrialTypes retuirned from
+        %  LEth.sciTrialTypes().
+        %  If a results table AND a trial type string (e.g. 'HH'), then a
+        %  single logical array is returned. 
+            if nargin==1
+                lBySciTrialType = cellfun(@(x) strcmp(R.sciTrialType, {x}), LEth.sciTrialTypes(), 'UniformOutput', false);
+            else
+                lBySciTrialType = strcmp(R.sciTrialType, varargin{1});
+            end
         end
 
+        function lHHHL = HHHL(R)
+        % HHHL(R) Returns a logical array corresponding to trials which are
+        %  'HH' or 'HL'. This is equivalent to asking for sciType HH and HL.
+            lHHHL = (R.StimTestType==1 & R.Folder1KeyRow==1) | (R.StimTestType==2 & R.Folder2KeyRow==1);
+        end
 
+        function lLLLH = LLLH(R)
+        % LLLH(R) Returns a logical array corresponding to trials which are
+        %  'LL' or 'LH'. This is equivalent to asking for sciType LL and LH.
+            lLLLH = (R.StimTestType==1 & R.Folder1KeyRow==2) | (R.StimTestType==2 & R.Folder2KeyRow==2);
+        end
+
+        function tf = isFullSetGD(R, nBoth, nGD, varargin)
+        % isFullSetGD checks trials given and verifies that it is a
+        %  complete set of goal-directed trials generated using the number of
+        %  both,left-only, and right-only image pairs. Pass a set of
+        %  completed() trials here! 
+
+            if nargin>3
+                bVerbose = varargin{1};
+            else
+                bVerbose = false;
+            end
+            
+            % count by (ImagePairIndex,CueSide) pairs
+            %
+            % 'both'-type images will have 16 trials for each CueSide
+            % 'GD' (goal-directed) images will have just 8 trials for each
+            % CueSide.
+
+            [counts, groups, ~] = groupcounts(horzcat(R.ImagePairIndex, R.CueSide));
+
+            % groups will be a 1x2 cell
+            % groups{1} and groups{2} are lists of ImagePairIndex and
+            % CueSide, respectively, that correspond to 'counts'.
+            % Each time the count is 16, the ImagePairIndex should appear
+            % twice (for cases CueSide = 1 and 2)
+            tf = all(groupcounts(groups{1}(counts==16)==2));
+            if ~tf
+                warning('Expecting 16 trials for each CueSide for neutral images');
+                return;
+            end
+            tf = all(groupcounts(groups{1}(counts==8)==2));
+            if ~tf
+                warning('Expecting 8 trials for each CueSide for GD images');
+                return;
+            end
+
+            % Count image pair indices for each CueSide
+            tf = all(sum(counts==16 & groups{2}==[1,2])==nBoth);
+            if ~tf
+                warning('Expecting %d neutral trials for each CueSide', nBoth);
+                return;
+            end
+
+            tf = all(sum(counts==8 & groups{2}==[1,2])==nGD);
+            if ~tf
+                warning('Expecting %d goal-directed trials for each CueSide', nGD);
+                return;
+            end
+
+        end
     end
 end
